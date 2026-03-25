@@ -107,4 +107,3 @@ The [live demo](https://shravya-rep.github.io/linkedin-manager-agent/) is fully 
 
 ---
 
-Built by [Shravya Shashidhar](https://www.linkedin.com/in/shravya-shashidhar/) · AI Team Lead · USC MS CS
