@@ -66,19 +66,38 @@ SynthesizerAgent → Daily digest
 
 ## Run locally
 
-**Backend:**
+You'll need an [Anthropic API key](https://console.anthropic.com/) to run the backend.
+
+**1. Start the backend**
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env   # add your ANTHROPIC_API_KEY
+cp .env.example .env   # paste your ANTHROPIC_API_KEY inside
 uvicorn main:app --reload
 ```
+Backend runs at `http://localhost:8000`. Keep this terminal open.
 
-**Extension:**
-1. Open `chrome://extensions`
-2. Enable Developer mode
-3. Load unpacked → select the `extension/` folder
-4. Go to LinkedIn — LinkLens activates automatically
+**2. Load the Chrome extension**
+1. Open `chrome://extensions` in Chrome
+2. Enable **Developer mode** (top right toggle)
+3. Click **Load unpacked** → select the `extension/` folder
+4. The LinkLens icon appears in your toolbar
+
+**3. Use it**
+1. Click the LinkLens icon → select what you don't want to see
+2. Go to `linkedin.com` and scroll your feed
+3. Posts load and get scored in real time
+4. Click **Show today's digest** in the popup for a summary
+
+> **Note:** The backend runs on your machine and the extension talks to `localhost:8000`. Nothing is sent to any external server except the Anthropic API for scoring.
+
+---
+
+## Status
+
+> **Work in progress.** The standalone [demo](https://shravya-rep.github.io/linkedin-manager-agent/) is fully functional. The Chrome extension + backend pipeline works locally and has been tested on the demo feed. Full testing on live LinkedIn is ongoing — LinkedIn's feed structure changes frequently and selector updates may be needed.
+
+Contributions and issue reports welcome.
 
 ---
 
