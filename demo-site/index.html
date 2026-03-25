@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkLens — Watch LinkedIn Through Your Own Lens</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0a66c2;
+      --blue-dark: #004182;
+      --blue-light: #f0f7ff;
+      --green: #27ae60;
+      --red: #c0392b;
+      --bg: #f3f2ef;
+      --card: #fff;
+      --border: #e0e0e0;
+      --text: #1d1d1d;
+      --muted: #666;
+    }
+
+    body { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text); }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #004182 0%, #0a66c2 100%);
+      color: #fff;
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
+    .hero p { font-size: 18px; opacity: 0.85; max-width: 540px; margin: 0 auto 32px; line-height: 1.6; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: #fff; color: var(--blue); border: none; padding: 12px 28px; border-radius: 24px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.6); padding: 12px 28px; border-radius: 24px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-white:hover { background: #e8f0fe; }
+    .btn-outline:hover { border-color: #fff; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 20px 24px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 800; color: var(--blue); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Section ── */
+    .section { max-width: 960px; margin: 0 auto; padding: 64px 24px; }
+    .section-label { font-size: 12px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .section-title { font-size: clamp(22px, 3vw, 32px); font-weight: 800; margin-bottom: 12px; }
+    .section-sub { font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.6; }
+
+    /* ── How it works ── */
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 40px; }
+    @media (max-width: 800px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
+    .step { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .step-num { width: 36px; height: 36px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; margin-bottom: 16px; }
+    .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Demo ── */
+    .demo-section { background: var(--bg); padding: 64px 0; }
+    .demo-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .demo-header { text-align: center; margin-bottom: 40px; }
+
+    /* Two-column layout */
+    .demo-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 700px) { .demo-columns { grid-template-columns: 1fr; } }
+
+    .feed-col { display: flex; flex-direction: column; gap: 0; }
+    .feed-col-header {
+      border-radius: 8px 8px 0 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+    .feed-col-header.unfiltered {
+      background: #f3f2ef;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .feed-col-header.filtered {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .feed { display: flex; flex-direction: column; gap: 8px; }
+
+    /* Right column stats strip */
+    .ll-stats {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .ll-stat { display: flex; align-items: center; gap: 5px; }
+    .ll-stat .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Post card ── */
+    .ll-post {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+      animation: fadeSlide 0.35s ease;
+      overflow: hidden;
+      transition: all 0.35s ease;
+    }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Scoring state */
+    .ll-post[data-state="scoring"] { opacity: 0.6; }
+
+    /* Hide state — silent thin line */
+    .ll-post[data-state="hide"] {
+      height: 6px !important;
+      padding: 0 !important;
+      border-color: #e8e8e8 !important;
+      background: #f5f5f5 !important;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .ll-post[data-state="hide"]:hover { height: 20px !important; }
+    .ll-post[data-state="hide"]::after {
+      content: "Hidden by LinkLens · hover to peek";
+      font-size: 10px;
+      color: #bbb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+    }
+
+    /* Highlight state */
+    .ll-post[data-state="highlight"] {
+      border-left: 4px solid var(--blue) !important;
+      background: #f8fbff !important;
+    }
+
+    .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .post-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0; }
+    .post-meta { flex: 1; min-width: 0; }
+    .post-author { font-weight: 700; font-size: 14px; }
+    .post-role { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .post-time { font-size: 10px; color: #aaa; }
+    .post-text { font-size: 13px; line-height: 1.65; color: #1d1d1d; white-space: pre-wrap; }
+    .post-actions { display: flex; gap: 4px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #f5f5f5; }
+    .post-btn { flex: 1; padding: 5px; background: none; border: none; font-size: 11px; color: var(--muted); cursor: pointer; border-radius: 4px; }
+    .post-btn:hover { background: #f3f2ef; }
+
+    .linklens-badge {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .scoring-indicator {
+      font-size: 11px;
+      color: #aaa;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .sentinel { text-align: center; color: #bbb; font-size: 12px; padding: 16px; }
+
+    .tag { display: inline-block; background: #e8f0fe; color: var(--blue); border-radius: 10px; padding: 2px 8px; font-size: 10px; margin: 2px; }
+
+    /* ── Digest ── */
+    .digest-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 16px;
+      display: none;
+    }
+    .digest-box.visible { display: block; animation: fadeSlide 0.4s ease; }
+    .digest-stat {
+      background: #f0faf4;
+      border-left: 4px solid var(--green);
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e8449;
+      margin-bottom: 20px;
+    }
+    .digest-bucket { margin-bottom: 16px; }
+    .digest-bucket h4 { font-size: 12px; font-weight: 800; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .digest-item { font-size: 13px; color: #333; padding: 4px 0 4px 16px; border-left: 2px solid #e0e0e0; margin-bottom: 4px; line-height: 1.5; }
+    .digest-item.blocked { color: #aaa; font-style: italic; border-left-color: #f0f0f0; }
+    .digest-btn { width: 100%; padding: 12px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    .digest-btn:hover { background: var(--blue-dark); }
+
+    /* ── CTA ── */
+    .cta { background: linear-gradient(135deg, #004182, #0a66c2); color: #fff; text-align: center; padding: 64px 24px; }
+    .cta h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    .cta p { font-size: 16px; opacity: 0.85; margin-bottom: 28px; }
+
+    /* ── Footer ── */
+    footer { text-align: center; padding: 24px; font-size: 12px; color: #aaa; border-top: 1px solid var(--border); }
+
+    /* ── Onboarding modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: fadeSlide 0.3s ease;
+    }
+    .modal-logo { font-size: 20px; font-weight: 800; color: var(--blue); margin-bottom: 4px; }
+    .modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .modal p { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .modal-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .modal-option:hover { border-color: var(--blue); background: var(--blue-light); }
+    .modal-option.selected { border-color: var(--blue); background: var(--blue-light); }
+    .modal-option input { display: none; }
+    .modal-option .opt-emoji { font-size: 18px; width: 24px; text-align: center; }
+    .modal-option .opt-label { font-size: 13px; font-weight: 500; color: #333; }
+    .modal-option .opt-check {
+      margin-left: auto;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--blue);
+      transition: border-color 0.15s;
+    }
+    .modal-option.selected .opt-check { border-color: var(--blue); background: var(--blue); color: #fff; }
+    .modal-start {
+      width: 100%;
+      padding: 14px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-start:hover { background: var(--blue-dark); }
+    .modal-skip { display: block; text-align: center; font-size: 12px; color: var(--muted); margin-top: 10px; cursor: pointer; }
+    .modal-skip:hover { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">✦ Open Source · Personal Intelligence Layer</div>
+  <h1>Watch LinkedIn Through<br>Your Own Lens</h1>
+  <p>LinkLens filters out hustle culture, anxiety posts, and hiring blasts — so only the signal you actually care about reaches you.</p>
+  <div class="hero-btns">
+    <a href="#demo" class="btn-white">Try the live demo</a>
+    <a href="https://github.com/shravyaverse/linklens" class="btn-outline" target="_blank">View on GitHub</a>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">~40%</div><div class="stat-label">of LinkedIn feed is noise</div></div>
+  <div class="stat-item"><div class="stat-num">20–30 min</div><div class="stat-label">wasted daily on noise</div></div>
+  <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">competitors solving this</div></div>
+  <div class="stat-item"><div class="stat-num">4 agents</div><div class="stat-label">working for you silently</div></div>
+</div>
+
+<!-- How it works -->
+<section class="section">
+  <div class="section-label">How it works</div>
+  <div class="section-title">Your personal content firewall</div>
+  <p class="section-sub">LinkLens sits between you and your LinkedIn feed. It never posts, never clicks, never interacts — it only watches and filters.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>You scroll normally</h3>
+      <p>LinkLens watches posts appear in your feed via a browser extension — just like an ad blocker.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>JudgeAgent scores each post</h3>
+      <p>Claude AI classifies every post: topic, signal score, anxiety score. Runs locally in milliseconds.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Noise disappears silently</h3>
+      <p>Hustle posts, anxiety content, mass hiring blasts — they collapse to a thin line. You never see them.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Signal gets highlighted</h3>
+      <p>Agentic AI, RAG, MLOps posts get a blue highlight. You stop and read exactly what matters.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <h3>Daily digest on demand</h3>
+      <p>At any time, request your digest. Everything you saw, organized into Tech, Jobs, People — plus what was blocked.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Live Demo -->
+<div class="demo-section" id="demo">
+  <div class="demo-inner">
+    <div class="demo-header">
+      <div class="section-label">Live demo</div>
+      <div class="section-title">Scroll the feed. Watch it filter in real time.</div>
+      <p class="section-sub" style="margin: 0 auto">Posts load one at a time — just like LinkedIn. LinkLens scores each one the moment it appears.</p>
+    </div>
+
+    <div class="demo-columns">
+
+      <!-- Left column: Without LinkLens -->
+      <div class="feed-col">
+        <div class="feed-col-header unfiltered">😵 Without LinkLens — everything hits you</div>
+        <div class="feed" id="feed-left">
+          <div class="sentinel" id="sentinel-left">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Right column: With LinkLens -->
+      <div class="feed-col">
+        <div class="feed-col-header filtered">✦ With LinkLens — only signal reaches you</div>
+        <div class="ll-stats">
+          <span class="ll-stat"><span class="dot" style="background:#0a66c2"></span><strong id="c-signal">0</strong> signal</span>
+          <span class="ll-stat"><span class="dot" style="background:#e0e0e0"></span><strong id="c-hidden">0</strong> hidden</span>
+          <span class="ll-stat" style="color:#aaa; font-size:11px;">⚡ scoring in real time</span>
+        </div>
+        <div class="feed" id="feed-right">
+          <div class="sentinel" id="sentinel-right">Loading...</div>
+        </div>
+
+        <!-- Digest -->
+        <div class="digest-box" id="digest-box">
+          <div class="digest-stat" id="digest-stat"></div>
+          <div id="digest-content"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Built for technical professionals who value signal over noise</h2>
+  <p>Open source · Runs locally · Never interacts with LinkedIn · Your data stays on your machine</p>
+  <a href="https://github.com/shravyaverse/linklens" class="btn-white" target="_blank">Get LinkLens on GitHub</a>
+</div>
+
+<footer>
+  Built by <strong>Shravya Shashidhar</strong> · ShravyaVerse | ThoughtAgent · <a href="https://github.com/shravyaverse/linklens" style="color:#0a66c2">GitHub</a>
+</footer>
+
+<!-- Onboarding modal -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-logo">LinkLens ✦</div>
+    <h2>What don't you want to see today?</h2>
+    <p>Select the types of content you want LinkLens to shield you from. You can change this anytime.</p>
+    <div class="modal-options" id="modal-options">
+      <label class="modal-option selected" data-id="hustle">
+        <span class="opt-emoji">💪</span>
+        <span class="opt-label">Hustle culture & morning routines</span>
+        <span class="opt-check">✓</span>
+      </label>
+      <label class="modal-option selected" data-id="job_doom">
+        <span class="opt-emoji">😰</span>
+        <span class="opt-label">Job market doom & layoff anxiety</span>
+        <span class="opt-check">✓</span>
+      </label>
+      <label class="modal-option selected" data-id="ai_doom">
+        <span class="opt-emoji">🤖</span>
+        <span class="opt-label">"AI will replace you" posts</span>
+        <span class="opt-check">✓</span>
+      </label>
+      <label class="modal-option selected" data-id="mass_hiring">
+        <span class="opt-emoji">📢</span>
+        <span class="opt-label">Mass hiring blasts (500+ roles)</span>
+        <span class="opt-check">✓</span>
+      </label>
+      <label class="modal-option selected" data-id="thought_leadership">
+        <span class="opt-emoji">♻️</span>
+        <span class="opt-label">Recycled thought leadership</span>
+        <span class="opt-check">✓</span>
+      </label>
+      <label class="modal-option selected" data-id="career_coach">
+        <span class="opt-emoji">🎯</span>
+        <span class="opt-label">Career coaches & "DM me" job pitches</span>
+        <span class="opt-check">✓</span>
+      </label>
+    </div>
+    <button class="modal-start" id="modal-start">Start filtering my feed →</button>
+    <span class="modal-skip" id="modal-skip">Skip — show everything</span>
+  </div>
+</div>
+
+<script>
+// ── Post data ──
+const POSTS = [
+  { id:"n1", color:"#e8a020", initials:"MC", author:"Motivational Coach Mike", role:"Career Coach · 500K followers", time:"1h",
+    text:"How to land a job in 30 days 🚀\n\nStep 1: Optimize your LinkedIn headline\nStep 2: DM 50 recruiters daily\nStep 3: Post content every day\nStep 4: Join my FREE webinar this Friday!\n\nI went from unemployed to $200K in 6 months. You can too.\n\nComment 'YES' if you want my free guide 👇",
+    signal: false, topic:"Career coach spam", anxiety: false },
+
+  { id:"s1", color:"#0a66c2", initials:"AK", author:"Arjun Kumar", role:"Staff ML Engineer @ Scale AI", time:"2h",
+    text:"LangGraph 0.3 just shipped persistent memory across sessions. Here's a breakdown of how checkpointers work under the hood and why this changes long-running agent workflows.\n\nThe key insight: graph state is now serialized to durable storage at every node boundary — your agent resumes exactly where it left off.",
+    signal: true, topic:"LangGraph · Agentic AI", anxiety: false },
+
+  { id:"n2", color:"#c0392b", initials:"DD", author:"Doom & Gloom Dave", role:"Tech Influencer · Future of Work", time:"3h",
+    text:"AI replaced 200,000 software engineers last quarter.\n\nThis is just the beginning.\n\nIf you're not learning AI skills RIGHT NOW you will be unemployed in 18 months.\n\nAre you prepared?",
+    signal: false, topic:"AI doom anxiety", anxiety: true },
+
+  { id:"s2", color:"#27ae60", initials:"PL", author:"Priya Lakshmanan", role:"ML Engineer @ Cohere", time:"4h",
+    text:"RAG is not dead — it's just being done wrong. Here's what we changed to go from 61% to 94% retrieval accuracy:\n\n(1) chunk overlap strategy\n(2) hybrid BM25 + dense retrieval\n(3) re-ranking with a cross-encoder\n\nEach change quantified with evals.",
+    signal: true, topic:"RAG & Retrieval", anxiety: false },
+
+  { id:"n3", color:"#d4a017", initials:"CC", author:"Career Coach Clara", role:"Helping professionals land $200K jobs", time:"5h",
+    text:"Struggling to find a job in 2026? Here's the truth nobody tells you:\n\nYour resume is not the problem.\nYour mindset is.\n\nI help mid-career professionals land jobs in 60 days or less.\n\n✅ Resume rewrite\n✅ LinkedIn optimization\n✅ Interview coaching\n\nDM me 'READY' and I'll send you my free 5-day job search challenge 🎯",
+    signal: false, topic:"Career coach pitch", anxiety: false },
+
+  { id:"s3", color:"#16a085", initials:"JR", author:"Jordan Reyes", role:"Agentic AI Researcher @ Anthropic", time:"6h",
+    text:"We ran a 72-hour autonomous agent experiment using CrewAI + GPT-4o. The agent completed 847 subtasks without human intervention.\n\nWhat broke: memory management and tool error recovery — not reasoning quality. Here's the full architecture breakdown.",
+    signal: true, topic:"Autonomous agents · CrewAI", anxiety: false },
+
+  { id:"n4", color:"#8e44ad", initials:"HR", author:"HR Hannah", role:"Talent Acquisition · MegaCorp", time:"7h",
+    text:"🚨 WE ARE HIRING 🚨\n\nWe have 500+ open roles across Engineering, Product, Sales, Marketing, HR, Finance, and Operations!\n\nAll levels. All locations. Remote friendly.\n\nDrop your resume below or DM me! ♻️♻️♻️",
+    signal: false, topic:"Mass hiring blast", anxiety: false },
+
+  { id:"s4", color:"#2980b9", initials:"MV", author:"Maya Vasquez", role:"ML Infrastructure Lead @ Mistral", time:"8h",
+    text:"How we serve 10M LLM requests/day on a $3k/month infra budget.\n\nKey decisions: vLLM for inference, speculative decoding for latency, aggressive KV cache tuning, and batching strategy.\n\nFull architecture diagram included.",
+    signal: true, topic:"LLM Inference · MLOps", anxiety: false },
+
+  { id:"n5", color:"#e67e22", initials:"SB", author:"Self-Made Steve", role:"Entrepreneur · Founder · Investor", time:"9h",
+    text:"I turned down a $500k offer to bet on myself.\n\nEveryone thought I was crazy.\n\nThat was 2 years ago.\n\nToday my company does $2M ARR.\n\nThe lesson: bet on yourself. Like if you agree 👍",
+    signal: false, topic:"Hustle brag", anxiety: false },
+
+  { id:"s5", color:"#8e44ad", initials:"RC", author:"Ravi Chandra", role:"LLMOps @ Weights & Biases", time:"10h",
+    text:"LLM evals are still broken in most teams. Here's the eval stack we built:\n\n— Unit evals for tool calls\n— Integration evals for multi-turn flows\n— Human preference pipeline for quality\n\nAll open source. Biggest blocker: getting engineers to run evals in CI.",
+    signal: true, topic:"LLM Evals · LLMOps", anxiety: false },
+
+  { id:"n6", color:"#7f8c8d", initials:"VT", author:"Veteran Tech Tim", role:"20 years in tech · Now consulting", time:"11h",
+    text:"The tech job market is the worst I've seen in 20 years.\n\nSenior engineers applying to 300 jobs with no callbacks.\n\nL5s at FAANG being let go with no warning.\n\nIf you have a job right now, do NOT leave it.",
+    signal: false, topic:"Job market doom", anxiety: true },
+
+  { id:"n7", color:"#bdc3c7", initials:"GL", author:"Generic LinkedIn", role:"Thought Leader · Consultant", time:"12h",
+    text:"AI is not going to replace you.\n\nA person using AI will replace you.\n\nThis applies to every industry. Every job. Every role.\n\nStart learning AI today. Repost to remind your network ♻️",
+    signal: false, topic:"Recycled thought leadership", anxiety: false },
+
+  { id:"s6", color:"#1abc9c", initials:"TN", author:"Tanaka Noboru", role:"Backend Engineer · Vector DB", time:"13h",
+    text:"We replaced ChromaDB with pgvector in production and cut p99 retrieval latency from 340ms to 47ms.\n\nHere's the migration path, indexing strategy, and the one gotcha that cost us 3 hours of debugging.",
+    signal: true, topic:"Vector DB · pgvector", anxiety: false },
+
+  { id:"n8", color:"#d4a017", initials:"JC", author:"Job Coach Jennifer", role:"Career Strategist · ex-Google Recruiter", time:"14h",
+    text:"I reviewed 1,000 resumes this month. Here's why you're not getting callbacks:\n\n❌ Generic objective statement\n❌ Responsibilities instead of achievements\n❌ No keywords from the job description\n❌ Wrong format for ATS\n\nWant me to review yours? Comment 'REVIEW' below 👇\n\n#JobSearch #CareerAdvice #Resume2026",
+    signal: false, topic:"Career coach pitch", anxiety: false },
+];
+
+// ── Block list (set by onboarding) ──
+let activeBlockList = ["hustle", "job_doom", "ai_doom", "mass_hiring", "thought_leadership", "career_coach"];
+
+const POST_BLOCK_MAP = {
+  "n1": ["career_coach", "hustle"],
+  "n2": ["ai_doom", "job_doom"],
+  "n3": ["career_coach"],
+  "n4": ["mass_hiring"],
+  "n5": ["hustle"],
+  "n6": ["job_doom"],
+  "n7": ["thought_leadership"],
+  "n8": ["career_coach"],
+};
+
+function shouldHide(postId) {
+  const tags = POST_BLOCK_MAP[postId] || [];
+  return tags.some(t => activeBlockList.includes(t));
+}
+
+// ── Modal ──
+document.querySelectorAll(".modal-option").forEach(opt => {
+  opt.addEventListener("click", () => opt.classList.toggle("selected"));
+});
+
+function showModal() {
+  document.querySelectorAll(".modal-option").forEach(o => o.classList.add("selected"));
+  document.getElementById("modal-overlay").classList.remove("hidden");
+}
+
+function startDemo(blockList) {
+  activeBlockList = blockList;
+  document.getElementById("modal-overlay").classList.add("hidden");
+  resetFeeds();
+  document.getElementById("demo").scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById("modal-start").addEventListener("click", () => {
+  const selected = [...document.querySelectorAll(".modal-option.selected")].map(o => o.dataset.id);
+  startDemo(selected);
+});
+
+document.getElementById("modal-skip").addEventListener("click", () => startDemo([]));
+
+document.querySelector("a[href='#demo']").addEventListener("click", (e) => {
+  e.preventDefault();
+  showModal();
+});
+
+// ── State ──
+const SCORING_DELAY = 700;
+let postIndex = 0;
+let counts = { hidden: 0, signal: 0 };
+
+function updateCounters() {
+  document.getElementById("c-hidden").textContent = counts.hidden;
+  document.getElementById("c-signal").textContent = counts.signal;
+}
+
+// ── Post HTML builder (shared) ──
+function postInnerHTML(p) {
+  return `
+    <div class="post-header">
+      <div class="post-avatar" style="background:${p.color}">${p.initials}</div>
+      <div class="post-meta">
+        <div class="post-author">${p.author}</div>
+        <div class="post-role">${p.role}</div>
+        <div class="post-time">${p.time} ago</div>
+      </div>
+    </div>
+    <div class="post-text">${p.text}</div>
+    <div class="post-actions">
+      <button class="post-btn">👍 Like</button>
+      <button class="post-btn">💬 Comment</button>
+      <button class="post-btn">♻️ Repost</button>
+    </div>
+  `;
+}
+
+// ── Left column: unfiltered, instant ──
+function buildPostLeft(p) {
+  const article = document.createElement("article");
+  article.className = "ll-post";
+  article.setAttribute("data-state", "show");
+  article.innerHTML = postInnerHTML(p);
+  return article;
+}
+
+// ── Right column: scored + filtered ──
+function buildPostRight(p) {
+  const article = document.createElement("article");
+  article.className = "ll-post";
+  article.setAttribute("data-state", "scoring");
+  article.innerHTML = `<div class="scoring-indicator">✦ LinkLens is reading this post...</div>` + postInnerHTML(p);
+
+  setTimeout(() => {
+    const hide = shouldHide(p.id);
+    if (hide) {
+      article.setAttribute("data-state", "hide");
+      counts.hidden++;
+    } else if (p.signal) {
+      article.setAttribute("data-state", "highlight");
+      const indicator = article.querySelector(".scoring-indicator");
+      if (indicator) { indicator.className = "linklens-badge"; indicator.textContent = `✦ ${p.topic}`; }
+      counts.signal++;
+    } else {
+      article.setAttribute("data-state", "show");
+      const indicator = article.querySelector(".scoring-indicator");
+      if (indicator) indicator.remove();
+    }
+    updateCounters();
+
+    // Chain: keep loading if sentinel is still visible
+    const sentinel = document.getElementById("sentinel-right");
+    if (sentinel && postIndex < POSTS.length) {
+      const rect = sentinel.getBoundingClientRect();
+      if (rect.top <= window.innerHeight + 400) setTimeout(loadNextPost, 200);
+    }
+    if (postIndex >= POSTS.length) {
+      if (sentinel) sentinel.textContent = "You're all caught up ✦";
+      setTimeout(showDigestButton, 500);
+    }
+  }, SCORING_DELAY);
+
+  return article;
+}
+
+// ── Load one post into both columns simultaneously ──
+function loadNextPost() {
+  if (postIndex >= POSTS.length) return;
+  const p = POSTS[postIndex++];
+
+  const feedLeft = document.getElementById("feed-left");
+  const sentinelLeft = document.getElementById("sentinel-left");
+  feedLeft.insertBefore(buildPostLeft(p), sentinelLeft);
+
+  const feedRight = document.getElementById("feed-right");
+  const sentinelRight = document.getElementById("sentinel-right");
+  feedRight.insertBefore(buildPostRight(p), sentinelRight);
+
+  if (postIndex >= POSTS.length) {
+    if (sentinelLeft) sentinelLeft.textContent = "End of feed";
+  }
+}
+
+// ── Reset both feeds ──
+function resetFeeds() {
+  postIndex = 0;
+  counts = { hidden: 0, signal: 0 };
+  updateCounters();
+
+  ["feed-left", "feed-right"].forEach(id => {
+    const feed = document.getElementById(id);
+    feed.querySelectorAll(".ll-post, .digest-btn, #show-digest-btn").forEach(el => el.remove());
+  });
+
+  document.getElementById("digest-box").classList.remove("visible");
+
+  document.getElementById("sentinel-left").textContent = "Loading...";
+  document.getElementById("sentinel-right").textContent = "Loading...";
+
+  // Observe right sentinel for scroll-triggered loading
+  observer.observe(document.getElementById("sentinel-right"));
+
+  // Load first 3 pairs immediately
+  loadNextPost();
+  loadNextPost();
+  loadNextPost();
+}
+
+// ── Digest ──
+function showDigestButton() {
+  const feedRight = document.getElementById("feed-right");
+  if (document.getElementById("show-digest-btn")) return;
+  const btn = document.createElement("button");
+  btn.id = "show-digest-btn";
+  btn.className = "digest-btn";
+  btn.textContent = "Show today's digest ✦";
+  btn.onclick = generateDigest;
+  feedRight.appendChild(btn);
+}
+
+function generateDigest() {
+  const box = document.getElementById("digest-box");
+  const stat = document.getElementById("digest-stat");
+  const content = document.getElementById("digest-content");
+
+  const hiddenPosts = POSTS.filter(p => shouldHide(p.id));
+  const hustleCount = hiddenPosts.filter(p => p.topic.toLowerCase().includes("hustle") || p.topic.toLowerCase().includes("brag")).length;
+  const anxietyCount = hiddenPosts.filter(p => p.anxiety).length;
+  const hiringCount = hiddenPosts.filter(p => p.topic.toLowerCase().includes("hiring")).length;
+  const thoughtCount = hiddenPosts.filter(p => p.topic.toLowerCase().includes("recycled") || p.topic.toLowerCase().includes("thought")).length;
+  const coachCount = hiddenPosts.filter(p => p.topic.toLowerCase().includes("coach")).length;
+
+  const parts = [];
+  if (hustleCount) parts.push(`${hustleCount} hustle post${hustleCount > 1 ? "s" : ""}`);
+  if (anxietyCount) parts.push(`${anxietyCount} anxiety post${anxietyCount > 1 ? "s" : ""}`);
+  if (hiringCount) parts.push(`${hiringCount} hiring blast${hiringCount > 1 ? "s" : ""}`);
+  if (thoughtCount) parts.push(`${thoughtCount} recycled thought leadership`);
+  if (coachCount) parts.push(`${coachCount} career coach pitch${coachCount > 1 ? "es" : ""}`);
+
+  stat.textContent = `✦ LinkLens had your back today. ${parts.join(", ")} filtered — you didn't have to see any of it.`;
+
+  const signalPosts = POSTS.filter(p => p.signal);
+  content.innerHTML = `
+    <div class="digest-bucket">
+      <h4>⚡ Tech signal</h4>
+      ${signalPosts.map(p => `<div class="digest-item"><strong>${p.topic}</strong> — ${p.text.split("\n")[0].slice(0, 80)}...</div>`).join("")}
+    </div>
+    <div class="digest-bucket">
+      <h4>🚫 Filtered today</h4>
+      ${hustleCount ? `<div class="digest-item blocked">· ${hustleCount} hustle post${hustleCount>1?"s":""} blocked</div>` : ""}
+      ${anxietyCount ? `<div class="digest-item blocked">· ${anxietyCount} anxiety post${anxietyCount>1?"s":""} blocked</div>` : ""}
+      ${hiringCount ? `<div class="digest-item blocked">· ${hiringCount} mass hiring blast${hiringCount>1?"s":""} blocked</div>` : ""}
+      ${thoughtCount ? `<div class="digest-item blocked">· ${thoughtCount} recycled thought leadership blocked</div>` : ""}
+      ${coachCount ? `<div class="digest-item blocked">· ${coachCount} career coach pitch${coachCount>1?"es":""} blocked</div>` : ""}
+    </div>
+    <div class="digest-bucket">
+      <h4>✅ Worth acting on</h4>
+      ${signalPosts.slice(0,2).map(p => `<div class="digest-item"><strong>${p.author}</strong> on ${p.topic} — worth reading in full</div>`).join("")}
+    </div>
+  `;
+
+  box.classList.add("visible");
+  box.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ── IntersectionObserver for right sentinel ──
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting && postIndex < POSTS.length) loadNextPost();
+}, { rootMargin: "400px" });
+
+observer.observe(document.getElementById("sentinel-right"));
+
+// Load first 3 pairs on page load
+loadNextPost();
+loadNextPost();
+loadNextPost();
+</script>
+</body>
+</html>

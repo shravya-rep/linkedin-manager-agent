@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>LinkLens Daily Digest</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 680px;
+      margin: 48px auto;
+      padding: 0 24px;
+      color: #1d1d1d;
+      line-height: 1.7;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #0a66c2;
+    }
+    .logo { font-size: 22px; font-weight: 800; color: #0a66c2; }
+    .date { font-size: 13px; color: #888; }
+    .brief { font-size: 15px; }
+    .brief h2 { font-size: 15px; font-weight: 700; color: #0a66c2; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .brief ul { padding-left: 20px; margin: 4px 0 12px; }
+    .brief li { margin: 4px 0; }
+    .brief hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+    .brief h1, .brief h2, .brief h3 {
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    .stat-line {
+      background: #f0faf4;
+      border-left: 4px solid #27ae60;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e8449;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">LinkLens ✦</div>
+    <div class="date" id="date"></div>
+  </div>
+  <div id="content"></div>
+
+  <script src="digest.js"></script>
+</body>
+</html>

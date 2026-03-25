@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkLens Demo Feed</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f3f2ef; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #000; }
+
+    .nav { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 22px; font-weight: 800; color: #0a66c2; }
+    .nav-logo span { color: #000; }
+    .nav-links { display: flex; gap: 24px; font-size: 13px; color: #666; }
+
+    .layout { max-width: 1128px; margin: 24px auto; display: grid; grid-template-columns: 225px 1fr 300px; gap: 24px; padding: 0 16px; }
+
+    .sidebar { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; height: fit-content; }
+    .sidebar-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #0a66c2, #004182); margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: 700; }
+    .sidebar-name { font-weight: 600; font-size: 15px; text-align: center; }
+    .sidebar-title { font-size: 12px; color: #666; text-align: center; margin-top: 2px; }
+    .sidebar-divider { border: none; border-top: 1px solid #e0e0e0; margin: 12px 0; }
+    .sidebar-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+    .sidebar-stat span:last-child { font-weight: 600; color: #0a66c2; }
+
+    .feed { display: flex; flex-direction: column; gap: 8px; }
+
+    .linklens-demo-label { background: #0a66c2; color: #fff; border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; }
+
+    /* Post skeleton shown while loading */
+    .ll-post-skeleton {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      opacity: 0.5;
+      animation: pulse 1s infinite alternate;
+    }
+    .skeleton-line { height: 12px; background: #e0e0e0; border-radius: 4px; margin: 8px 0; }
+    @keyframes pulse { from { opacity: 0.4; } to { opacity: 0.7; } }
+
+    .ll-post { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; position: relative; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .post-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: #fff; flex-shrink: 0; }
+    .post-meta { flex: 1; }
+    .post-author { font-weight: 600; font-size: 14px; }
+    .post-role { font-size: 12px; color: #666; }
+    .post-time { font-size: 11px; color: #999; }
+    .post-text { font-size: 14px; line-height: 1.6; color: #1d1d1d; white-space: pre-wrap; }
+    .post-actions { display: flex; gap: 4px; margin-top: 12px; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+    .post-btn { flex: 1; padding: 6px; background: none; border: none; border-radius: 4px; font-size: 12px; color: #666; cursor: pointer; text-align: center; }
+    .post-btn:hover { background: #f3f2ef; color: #0a66c2; }
+
+    /* Sentinel triggers next post load */
+    .sentinel { height: 40px; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 12px; }
+
+    .right-sidebar { display: flex; flex-direction: column; gap: 16px; }
+    .widget { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; }
+    .widget h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .widget-item { font-size: 13px; color: #333; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .widget-item:last-child { border-bottom: none; }
+    .tag { display: inline-block; background: #e8f0fe; color: #0a66c2; border-radius: 12px; padding: 2px 10px; font-size: 11px; margin: 2px; }
+
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar, .right-sidebar { display: none; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">Link<span>Lens</span> <span style="font-size:13px;font-weight:400;color:#666">Demo Feed</span></div>
+  <div class="nav-links"><a href="#">Home</a><a href="#">My Network</a><a href="#">Jobs</a></div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-avatar">S</div>
+    <div class="sidebar-name">Shravya Shashidhar</div>
+    <div class="sidebar-title">AI Team Lead · USC MS CS</div>
+    <hr class="sidebar-divider" />
+    <div class="sidebar-stat"><span>Profile views</span><span>312</span></div>
+    <div class="sidebar-stat"><span>Post impressions</span><span>1,847</span></div>
+    <div class="sidebar-stat"><span>Connections</span><span>500+</span></div>
+  </aside>
+
+  <main class="feed" id="feed">
+    <div class="linklens-demo-label">✦ LinkLens Demo Feed — Scroll to load posts</div>
+    <!-- Posts injected here by JS -->
+    <div class="sentinel" id="sentinel">Scroll for more...</div>
+  </main>
+
+  <aside class="right-sidebar">
+    <div class="widget">
+      <h3>LinkLens is active ✦</h3>
+      <div class="widget-item">Signal posts are <strong style="color:#0a66c2">highlighted</strong></div>
+      <div class="widget-item">Noise posts <strong style="color:#999">collapse silently</strong></div>
+      <div class="widget-item">Hover a post to block its type</div>
+    </div>
+    <div class="widget">
+      <h3>Your signal topics</h3>
+      <div>
+        <span class="tag">Agentic AI</span>
+        <span class="tag">LangGraph</span>
+        <span class="tag">RAG</span>
+        <span class="tag">MLOps</span>
+        <span class="tag">LLM Evals</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const POSTS = [
+  { id: "n1", color: "#e8a020", initials: "MC", author: "Motivational Coach Mike", role: "Life Coach · Speaker · 500K followers", time: "2h ago",
+    text: "5 habits of the most successful people I know:\n1. Wake up at 5am\n2. Never miss a Monday\n3. Read 30 books a year\n4. Cold showers\n5. Gratitude journal\n\nWhich one will you start today? 👇\n\n#Success #Mindset #GrowthMindset" },
+
+  { id: "s3", color: "#0a66c2", initials: "AK", author: "Arjun Kumar", role: "Staff ML Engineer @ Scale AI", time: "3h ago",
+    text: "LangGraph 0.3 just shipped persistent memory across sessions. Here's a breakdown of how checkpointers work under the hood and why this changes long-running agent workflows.\n\nThe key insight: graph state is now serialized to durable storage at every node boundary, meaning your agent can resume exactly where it left off after a crash, interrupt, or human-in-the-loop pause." },
+
+  { id: "n5", color: "#c0392b", initials: "DD", author: "Doom & Gloom Dave", role: "Tech Influencer · Future of Work Speaker", time: "4h ago",
+    text: "AI replaced 200,000 software engineers last quarter.\n\nThis is just the beginning.\n\nIf you're not learning AI skills RIGHT NOW you will be unemployed in 18 months.\n\nThis is not fear mongering. This is reality.\n\nAre you prepared?" },
+
+  { id: "s6", color: "#27ae60", initials: "PL", author: "Priya Lakshmanan", role: "ML Engineer @ Cohere · RAG specialist", time: "5h ago",
+    text: "RAG is not dead — it's just being done wrong. Here's what we changed to go from 61% to 94% retrieval accuracy:\n\n(1) chunk overlap strategy\n(2) hybrid BM25 + dense retrieval\n(3) re-ranking with a cross-encoder\n\nEach change and its impact explained with evals." },
+
+  { id: "n8", color: "#8e44ad", initials: "HR", author: "HR Hannah", role: "Talent Acquisition · MegaCorp Inc.", time: "6h ago",
+    text: "🚨 WE ARE HIRING 🚨\n\nWe have 500+ open roles across Engineering, Product, Sales, Marketing, HR, Finance, and Operations!\n\nAll levels. All locations. Remote friendly.\n\nDrop your resume below or DM me!\n\nShare to help someone land their dream job! ♻️♻️♻️" },
+
+  { id: "s2", color: "#16a085", initials: "JR", author: "Jordan Reyes", role: "Agentic AI Researcher @ Anthropic", time: "7h ago",
+    text: "We ran a 72-hour autonomous agent experiment using CrewAI + GPT-4o. The agent completed 847 subtasks without human intervention.\n\nHere's what broke, what held, and what we'd architect differently.\n\nSpoiler: memory management and tool error recovery were the two biggest failure modes." },
+
+  { id: "n2", color: "#e67e22", initials: "SB", author: "Self-Made Steve", role: "Entrepreneur · Founder · Investor", time: "8h ago",
+    text: "I turned down a $500k offer to bet on myself.\n\nEveryone thought I was crazy.\n\nThat was 2 years ago.\n\nToday my company does $2M ARR.\n\nThe lesson: bet on yourself.\n\nLike if you agree 👍" },
+
+  { id: "s9", color: "#2980b9", initials: "MV", author: "Maya Vasquez", role: "ML Infrastructure Lead @ Mistral", time: "9h ago",
+    text: "How we serve 10M LLM requests/day on a $3k/month infra budget.\n\nKey decisions: vLLM for inference, speculative decoding for latency, aggressive KV cache tuning, and batching strategy.\n\nFull architecture diagram in the post." },
+
+  { id: "n6", color: "#7f8c8d", initials: "VT", author: "Veteran Tech Tim", role: "20 years in tech · Now consulting", time: "10h ago",
+    text: "The tech job market is the worst I've seen in 20 years.\n\nSenior engineers applying to 300 jobs with no callbacks.\n\nL5s at FAANG being let go with no warning.\n\nIf you have a job right now, do NOT leave it. Hold on for dear life." },
+
+  { id: "s10", color: "#8e44ad", initials: "RC", author: "Ravi Chandra", role: "LLMOps Engineer @ Weights & Biases", time: "11h ago",
+    text: "LLM evals are still broken in most teams. Here's the eval stack we built:\n\n- Unit evals for tool calls\n- Integration evals for multi-turn flows\n- Human preference eval pipeline for quality\n\nAll open source. The hardest part wasn't the tech — it was getting engineers to actually run evals in CI." },
+
+  { id: "n10", color: "#bdc3c7", initials: "GL", author: "Generic LinkedIn", role: "Thought Leader · Speaker · Consultant", time: "12h ago",
+    text: "AI is not going to replace you.\n\nA person using AI will replace you.\n\nThis applies to every industry. Every job. Every role.\n\nStart learning AI today.\n\nRepost to remind your network ♻️\n\n#AI #FutureOfWork" },
+
+  { id: "s7", color: "#1abc9c", initials: "TN", author: "Tanaka Noboru", role: "Backend Engineer · Vector DB enthusiast", time: "13h ago",
+    text: "We replaced ChromaDB with pgvector in production and cut our p99 retrieval latency from 340ms to 47ms.\n\nHere's the migration path, indexing strategy, and the one gotcha that cost us 3 hours of debugging." },
+];
+
+let postIndex = 0;
+
+function buildPost(p) {
+  const article = document.createElement("article");
+  article.className = "ll-post";
+  article.setAttribute("data-post-id", p.id);
+  article.innerHTML = `
+    <div class="post-header">
+      <div class="post-avatar" style="background:${p.color}">${p.initials}</div>
+      <div class="post-meta">
+        <div class="post-author">${p.author}</div>
+        <div class="post-role">${p.role}</div>
+        <div class="post-time">${p.time}</div>
+      </div>
+    </div>
+    <div class="post-text">${p.text}</div>
+    <div class="post-actions">
+      <button class="post-btn">👍 Like</button>
+      <button class="post-btn">💬 Comment</button>
+      <button class="post-btn">♻️ Repost</button>
+    </div>
+  `;
+  return article;
+}
+
+function loadNextPost() {
+  if (postIndex >= POSTS.length) {
+    document.getElementById("sentinel").textContent = "You're all caught up ✦";
+    return;
+  }
+
+  const post = POSTS[postIndex++];
+  const sentinel = document.getElementById("sentinel");
+  const feed = document.getElementById("feed");
+
+  // Show skeleton briefly, then inject real post
+  const skeleton = document.createElement("div");
+  skeleton.className = "ll-post-skeleton";
+  skeleton.innerHTML = `
+    <div class="skeleton-line" style="width:40%"></div>
+    <div class="skeleton-line" style="width:80%"></div>
+    <div class="skeleton-line" style="width:60%"></div>
+  `;
+  feed.insertBefore(skeleton, sentinel);
+
+  setTimeout(() => {
+    skeleton.remove();
+    const article = buildPost(post);
+    feed.insertBefore(article, sentinel);
+  }, 400);
+}
+
+// Load first 3 posts immediately
+loadNextPost();
+loadNextPost();
+loadNextPost();
+
+// Then load one more each time sentinel comes into view
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    loadNextPost();
+  }
+}, { rootMargin: "200px" });
+
+observer.observe(document.getElementById("sentinel"));
+</script>
+
+</body>
+</html>
